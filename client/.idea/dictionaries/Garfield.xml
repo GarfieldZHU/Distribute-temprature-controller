@@ -3,6 +3,7 @@
     <words>
       <w>clientid</w>
       <w>fanlevel</w>
+      <w>mosquitto</w>
       <w>mqtt</w>
     </words>
   </dictionary>

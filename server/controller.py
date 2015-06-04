@@ -10,3 +10,7 @@ class Controller:
         self._state = 'off'
         self._temp = 25
         self._mqtt = MqttServer()
+        self._task = []
+
+    def dispatch(self):
+        pass

@@ -9,6 +9,7 @@
 
 import sys
 from PySide import QtCore, QtGui
+from controller import Controller
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -27,16 +28,23 @@ class Ui_MainWindow(object):
         self.curTemp = QtGui.QLCDNumber(self.frame)
         self.curTemp.setGeometry(QtCore.QRect(30, 60, 151, 31))
         self.curTemp.setObjectName("curTemp")
+        self.curTemp.display('25')
         self.targetTemp = QtGui.QLCDNumber(self.frame)
         self.targetTemp.setGeometry(QtCore.QRect(30, 110, 151, 31))
         self.targetTemp.setObjectName("targetTemp")
+        self.targetTemp.display('25')
         self.stateLabel = QtGui.QLabel(self.frame)
         self.stateLabel.setGeometry(QtCore.QRect(30, 10, 141, 31))
-        self.stateLabel.setText("")
+        self.stateLabel.setText("\t--Off--")
         self.stateLabel.setObjectName("stateLabel")
+        self.speedLabel = QtGui.QLabel(self.frame)
+        self.speedLabel.setGeometry(QtCore.QRect(30, 165, 151, 21))
+        self.speedLabel.setText("\t------")
+        self.speedLabel.setObjectName("speedLabel")
         self.totalCost = QtGui.QLCDNumber(self.frame)
         self.totalCost.setGeometry(QtCore.QRect(30, 200, 151, 31))
         self.totalCost.setObjectName("totalCost")
+        self.totalCost.display('0.00')
         self.label = QtGui.QLabel(self.centralWidget)
         self.label.setGeometry(QtCore.QRect(240, 90, 59, 16))
         self.label.setObjectName("label")
@@ -80,7 +88,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "空调从控机控制面板", None, QtGui.QApplication.UnicodeUTF8))
         self.switchButton.setText(QtGui.QApplication.translate("MainWindow", "开/关", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "当前温度", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "目标温度", None, QtGui.QApplication.UnicodeUTF8))
@@ -99,6 +107,57 @@ class ControlMainWindow(QtGui.QMainWindow):
         super(ControlMainWindow, self).__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.controller = Controller('304')
+        self.initDisplay()
+        self.ui.switchButton.clicked.connect(self.switch)
+        self.ui.tempUp.clicked.connect(self.riseTemp)
+        self.ui.tempDown.clicked.connect(self.reduceTemp)
+        self.ui.speedUp.clicked.connect(self.riseSpeed)
+        self.ui.speedDown.clicked.connect(self.reduceSpeed)
+
+    def initDisplay(self):
+        self.ui.curTemp.display(self.controller.get_cur_temp())
+        self.ui.targetTemp.display(self.controller.get_temp())
+        self.setSpeed(self.controller.get_fan())
+        self.ui.totalCost.display(self.controller.get_cost())
+
+    def switch(self):
+        if self.controller.is_on():
+            self.controller.power_off()
+            self.ui.stateLabel.setText("\t--Off--")
+        else:
+            self.controller.start_up()
+            self.ui.stateLabel.setText("\t--On--")
+
+    def riseTemp(self):
+        self.controller.rise_temp()
+        self.ui.targetTemp.display(self.controller.get_temp())
+
+    def reduceTemp(self):
+        self.controller.reduce_temp()
+        self.ui.targetTemp.display(self.controller.get_temp())
+
+    def riseSpeed(self):
+        self.controller.rise_fan()
+        speed = self.controller.get_fan()
+        self.setSpeed(speed)
+
+    def reduceSpeed(self):
+        self.controller.reduce_fan()
+        speed = self.controller.get_fan()
+        self.setSpeed(speed)
+
+    def setSpeed(self, speed):
+        i = 6
+        text = '\t'
+        while i > 0:
+            if i > speed*2:
+                text += '-'
+            else:
+                text += '#'
+            i -= 1
+        self.ui.speedLabel.setText(text)
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

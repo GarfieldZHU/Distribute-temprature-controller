@@ -27,7 +27,7 @@ class MySqlDB:
             cursor.execute(sql)
             self._conn.commit()
         except mysql.connector.Error as e:
-            print('query error!{}'.format(e))
+            print('insert error!{}'.format(e))
         finally:
             cursor.close()
 
@@ -40,7 +40,7 @@ class MySqlDB:
             cursor.execute(sql)
             self._conn.commit()
         except mysql.connector.Error as e:
-            print('query error!{}'.format(e))
+            print('insert error!{}'.format(e))
         finally:
             cursor.close()
 
@@ -52,9 +52,62 @@ class MySqlDB:
             cursor.execute(sql)
             self._conn.commit()
         except mysql.connector.Error as e:
+            print('insert error!{}'.format(e))
+        finally:
+            cursor.close()
+
+    def update_client_query(self, item):
+        cursor = self._conn.cursor()
+        try:
+            sql = "update client set ison='%s', targetTemp='%s', fanLevel='%s' \
+                where room_id='%s';" % item
+            #print sql
+            cursor.execute(sql)
+            self._conn.commit()
+        except mysql.connector.Error as e:
+            print('update error!{}'.format(e))
+        finally:
+            cursor.close()
+
+    def update_client_result(self, item):
+        cursor = self._conn.cursor()
+        try:
+            sql = "update client set curTemp='%s', cost='%s' \
+                where room_id='%s';" % item
+            #print sql
+            cursor.execute(sql)
+            self._conn.commit()
+        except mysql.connector.Error as e:
+            print('update error!{}'.format(e))
+        finally:
+            cursor.close()
+
+    def update_list(self, item):
+        cursor = self._conn.cursor()
+        try:
+            sql = "update list set endTime='%s', endTemp='%s' \
+                where room_id='%s';" % item
+            #print sql
+            cursor.execute(sql)
+            self._conn.commit()
+        except mysql.connector.Error as e:
+            print('update error!{}'.format(e))
+        finally:
+            cursor.close()
+
+    def query_user_room(self):
+        cursor = self._conn.cursor()
+        try:
+            sql = "select room_id from user;"
+            cursor.execute(sql)
+            res = []
+            for item in cursor:
+                res.append(item)
+        except mysql.connector.Error as e:
             print('query error!{}'.format(e))
         finally:
             cursor.close()
+            return res
 
     def query_user(self, room_id):
         cursor = self._conn.cursor()
@@ -122,7 +175,7 @@ class MySqlDB:
             cursor.execute(sql, room_id)
             self._conn.commit()
         except mysql.connector.Error as e:
-            print('query error!{}'.format(e))
+            print('delete error!{}'.format(e))
         finally:
             cursor.close()
 
@@ -133,7 +186,7 @@ class MySqlDB:
             cursor.execute(sql, room_id)
             self._conn.commit()
         except mysql.connector.Error as e:
-            print('query error!{}'.format(e))
+            print('delete error!{}'.format(e))
         finally:
             cursor.close()
 
@@ -144,7 +197,7 @@ class MySqlDB:
             cursor.execute(sql, room_id)
             self._conn.commit()
         except mysql.connector.Error as e:
-            print('query error!{}'.format(e))
+            print('delete error!{}'.format(e))
         finally:
             cursor.close()
 

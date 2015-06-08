@@ -15,39 +15,54 @@ class Controller:
         self._fanLevel = 1
         self._cost = 0
         self._url = "http://localhost:8888/jsonrpc"
+        self._isCentralOn = True
 
         self.MAXTEMP = 30
         self.MINTEMP = 20
 
     def get(self):
         state = request(self._url, "get", self._id)
-        self.MAXTEMP = state['maxTemprature']
-        self.MINTEMP = state['minTemprature']
-        return state
+        if state is not None:
+            self.MAXTEMP = state['maxTemperature']
+            self.MINTEMP = state['minTemperature']
+            self._fanLevel = state['fanLevel']
+            self._curTemp = state['temperature']
+            self._cost = state['cost']
+            self._isCentralOn = state['isCentralOn']
+            print "-[log] <get>: ", state
+        #return state
 
     def set(self, state):
-        print self._id
+        #print self._id
         return request(self._url, "set", self._id, state)
 
     def rise_temp(self):
         if self._goalTemp < self.MAXTEMP:
-            if self.set({"temprature": self._goalTemp}):
+            if self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
+                    "targetTemperature": self._goalTemp+1}):
                 self._goalTemp += 1
+                print "- [log] temperature rise to ", self._goalTemp
 
     def reduce_temp(self):
         if self._goalTemp > self.MINTEMP:
-            if self.set({"temprature": self._goalTemp}):
+            if self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
+                    "targetTemperature": self._goalTemp-1}):
                 self._goalTemp -= 1
+                print "- [log] temperature down to ", self._goalTemp
 
     def rise_fan(self):
         if self._fanLevel < 3:
-            if self.set({"fanlevel": self._fanLevel}):
+            if self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
+                    "targetTemperature": self._goalTemp+1}):
                 self._fanLevel += 1
+                print "- [log] fan level rise to ", self._fanLevel
 
     def reduce_fan(self):
         if self._fanLevel > 1:
-            if self.set({"fanlevel": self._fanLevel}):
+            if self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
+                    "targetTemperature": self._goalTemp-1}):
                 self._fanLevel -= 1
+                print "- [log] temperature down to ", self._fanLevel
 
     def is_on(self):
         return self._ison
@@ -66,20 +81,22 @@ class Controller:
 
     def start_up(self):
         #从控机开机
-        self._ison = True
-        self.set({"ison": True})
+        if self.set({"ison": True, "fanLevel": self._fanLevel, \
+            "targetTemperature": self._goalTemp}):
+            self._ison = True
 
     def power_off(self):
         #从控机关机
-        self._ison = False
-        self.set({"ison": False})
+        if self.set({"ison": False, "fanLevel": self._fanLevel, \
+            "targetTemperature": self._goalTemp}):
+            self._ison = False
 
     def update(self, state):
         self._cost = state['cost']
 
     def test(self):
         print self.get()
-        self.set({ "ison": True, "fanlevel": 2, "temperature":24 })
+        self.set({ "ison": True, "fanLevel": 2, "temperature":24 })
         print self.get()
 
 
@@ -87,8 +104,12 @@ def request(url, func, *args):
     req = json.dumps({"method": func, "params": args, "id": 1})
     result = urllib.urlopen(url, req).read()
     try:
+        #print result
         response = json.loads(result)
+        #print response
     except:
         return "error: %s" % result
     else:
-        return response.get("result", response.get("error"))
+        res = response.get("result", response.get("error"))
+        #print res
+        return res

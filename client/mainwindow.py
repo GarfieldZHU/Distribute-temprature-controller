@@ -8,8 +8,11 @@
 # WARNING! All changes made in this file will be lost!
 
 import sys
+import time
+import threading
 from PySide import QtCore, QtGui
 from controller import Controller
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -105,6 +108,7 @@ class Ui_MainWindow(object):
 class ControlMainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(ControlMainWindow, self).__init__(parent)
+        self.if_end = False
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.controller = Controller('304')
@@ -114,6 +118,8 @@ class ControlMainWindow(QtGui.QMainWindow):
         self.ui.tempDown.clicked.connect(self.reduceTemp)
         self.ui.speedUp.clicked.connect(self.riseSpeed)
         self.ui.speedDown.clicked.connect(self.reduceSpeed)
+
+        threading.Thread(target=self.update_thread).start()
 
     def initDisplay(self):
         self.ui.curTemp.display(self.controller.get_cur_temp())
@@ -125,9 +131,11 @@ class ControlMainWindow(QtGui.QMainWindow):
         if self.controller.is_on():
             self.controller.power_off()
             self.ui.stateLabel.setText("\t--Off--")
+            print "- [log] Power off..."
         else:
             self.controller.start_up()
             self.ui.stateLabel.setText("\t--On--")
+            print "- [log] Start up..."
 
     def riseTemp(self):
         self.controller.rise_temp()
@@ -158,9 +166,19 @@ class ControlMainWindow(QtGui.QMainWindow):
             i -= 1
         self.ui.speedLabel.setText(text)
 
+    def update_thread(self):
+        while not self.if_end:
+            print 'update'
+            self.controller.get()
+            self.ui.curTemp.display(self.controller.get_cur_temp())
+            self.ui.targetTemp.display(self.controller.get_temp())
+            self.setSpeed(self.controller.get_fan())
+            self.ui.totalCost.display(self.controller.get_cost())
+            time.sleep(60)
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     mySW = ControlMainWindow()
     mySW.show()
     sys.exit(app.exec_())
+    mySW.if_end = True

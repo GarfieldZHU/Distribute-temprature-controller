@@ -13,13 +13,16 @@ from cyclone.web import HTTPError, RequestHandler
 
 from twisted.internet import defer, reactor
 from twisted.python import log, failure
+
+from server_handle import ServerHandle
 from database import MySqlDB
 
 # room = [{ "ison": True, "fanlevel": 2, "temperature": 26, "cost": 10.2,
 #    "isCentralOn": True, "maxTemperature": 30, "minTemperature": 20 }]
 
 room = {}
-db = MySqlDB()
+server = ServerHandle()
+
 
 class JsonrpcHandler(cyclone.jsonrpc.JsonrpcRequestHandler):
     def post(self, *args):
@@ -66,13 +69,18 @@ class JsonrpcHandler(cyclone.jsonrpc.JsonrpcRequestHandler):
         return len(items)
 
     def jsonrpc_get(self, i):
-        return room[i]
+        if server.get_controller(i) is not None:
+            return server.get(i)
 
     def jsonrpc_set(self, i, d):
         #根据房间请求在主控端进行处理，完成返回true，未完成返回
         room_id = i
-        if db.query_client():
-            return True
+        if server.get_controller(i) is not None:
+            item =  (d['ison'], d['targetTemperature'], d['fanLevel'], i)
+            temp = server.get(i)['temperature']
+            server.get_controller(i).set_task(d['targetTemperature'], d['fanLevel'], temp)
+            print "- [test-msg] <set>", item
+            return server.set(item)
         else:
             return False
 

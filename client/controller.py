@@ -29,7 +29,7 @@ class Controller:
             self._curTemp = state['temperature']
             self._cost = state['cost']
             self._isCentralOn = state['isCentralOn']
-            print "-[log] <get>: ", state
+            print "- [log] <get>: ", state
         #return state
 
     def set(self, state):

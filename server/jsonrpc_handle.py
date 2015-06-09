@@ -78,8 +78,14 @@ class JsonrpcHandler(cyclone.jsonrpc.JsonrpcRequestHandler):
         if server.get_controller(i) is not None:
             item =  (d['ison'], d['targetTemperature'], d['fanLevel'], i)
             temp = server.get(i)['temperature']
-            server.get_controller(i).set_task(d['targetTemperature'], d['fanLevel'], temp)
-            print "- [test-msg] <set>", item
+            if d['ison']:
+                data = server.get_db().query_client(i)
+                cost = data['cost']
+                server.get_controller(i).set_task(d['targetTemperature'], \
+                    d['fanLevel'], temp, float(cost))
+            else:
+                server,get_controller(i).finish_task()
+            print "- [test-msg] <set_task>", item
             return server.set(item)
         else:
             return False

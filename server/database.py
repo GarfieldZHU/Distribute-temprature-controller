@@ -144,7 +144,7 @@ class MySqlDB:
             print('query error!{}'.format(e))
         finally:
             cursor.close()
-            print res
+            #print res
             return res
 
     def query_list(self, room_id):

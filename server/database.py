@@ -82,6 +82,18 @@ class MySqlDB:
         finally:
             cursor.close()
 
+    def update_client_curtemp(self, item):
+        cursor = self._conn.cursor()
+        try:
+            sql = "update client set curTemp='%s' where room_id='%s';" % item
+            #print sql
+            cursor.execute(sql)
+            self._conn.commit()
+        except mysql.connector.Error as e:
+            print('update error!{}'.format(e))
+        finally:
+            cursor.close()
+
     def update_list(self, item):
         cursor = self._conn.cursor()
         try:

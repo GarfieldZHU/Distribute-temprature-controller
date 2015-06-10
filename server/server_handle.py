@@ -56,6 +56,15 @@ class ServerHandle:
         else:
             return False
 
+    def auto_set(self, i):
+        #自动变温函数
+        curTemp = self._db.query_client(i)['curTemp']
+        if self._mode == 'cold':
+            item = (curTemp+1, i)
+        else:
+            item = (curTemp-1, i)
+        self._db.update_client_(item)
+
     def record(self, item):
         self._db.update_list(item)
         print "- [record] ", item
@@ -101,9 +110,9 @@ class ServerHandle:
                     ctl.update_cost()
 
                     if ctl.if_finish():
-                        item = (ctl.get_room, ctl.get_beginTime, \
-                            ctl.get_endTime, self.state, ctl.get_fan, \
-                            ctl.get_beginTemp, ctl.get_endTemp
+                        item = (ctl.get_room(), ctl.get_beginTime(), \
+                            ctl.get_endTime(), self._mode, ctl.get_fan(), \
+                            ctl.get_beginTemp(), ctl.get_endTemp())
                         self._db.insert_list(item)
                     temp = ctl.get_temp()
                     cost = ctl.get_cost()
@@ -111,12 +120,11 @@ class ServerHandle:
                         print "- [serve] <time> ", datetime.datetime.now(), \
                             "\t<temprature>", round(temp,2), "\t<cost> ", \
                             round(cost,2)
+                        room_id = ctl.get_room()
+                        item = (temp, cost, room_id)
+                        self._db.update_client_result(item)
                     else:
                         print "- [serve] task finish"
-
-                    room_id = ctl.get_room()
-                    item = (temp, cost, room_id)
-                    self._db.update_client_result(item)
 
             time.sleep(1)
 

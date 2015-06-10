@@ -16,8 +16,9 @@ class Controller:
         self._cost = 0
         self._url = "http://localhost:8888/jsonrpc"
         self._isCentralOn = True
-
-        self.MAXTEMP = 30
+        self._mode = 'cold'
+        self._finish = False
+        self.MAXTEMP = 25
         self.MINTEMP = 20
 
     def get(self):
@@ -29,7 +30,18 @@ class Controller:
             self._curTemp = state['temperature']
             self._cost = state['cost']
             self._isCentralOn = state['isCentralOn']
+            if self.MAXTEMP >= 28:
+                self._mode = 'warm'
+            else:
+                self._mode = 'cold'
+            if state['temperature'] == self._goalTemp:
+                self._finish = True
+            else:
+                self._finish = False
             print "- [log] <get>: ", state
+            return True
+        else:
+            return False
         #return state
 
     def set(self, state):
@@ -67,6 +79,9 @@ class Controller:
     def is_on(self):
         return self._ison
 
+    def if_finish(self):
+        return self._finish
+
     def get_cur_temp(self):
         return self._curTemp
 
@@ -78,6 +93,15 @@ class Controller:
 
     def get_cost(self):
         return self._cost
+
+    def get_mode(self):
+        return self._mode
+
+    def resume_temp(self):
+        if self._mode == 'cold':
+            self._curTemp += 1
+        else:
+            self._curTemp -= 1
 
     def start_up(self):
         #从控机开机
@@ -102,7 +126,12 @@ class Controller:
 
 def request(url, func, *args):
     req = json.dumps({"method": func, "params": args, "id": 1})
-    result = urllib.urlopen(url, req).read()
+    result = ''
+    try:
+        result = urllib.urlopen(url, req).read()
+    except:
+        print '- [JsonRpc] <Fail> Server is not online'
+        return None
     try:
         #print result
         response = json.loads(result)

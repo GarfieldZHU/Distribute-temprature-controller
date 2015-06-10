@@ -28,6 +28,7 @@ class Controller:
         self._cost = cost
 
     def finish_task(self):
+        print "<controller> task finished"
         self._task = [-1, -1, -1]
         self._priority = 0
         self._time = 0
@@ -109,6 +110,8 @@ class Controller:
         #self.wait_time = int(time.time() - self.in_time)
         #self._priority = self._task[1] + (self.wait_time / 30)
         self._priority = self._task[1]
+        print "- [controller] <room> ", self._room, " <priority> ", \
+            self._priority
 
     def get_priority(self):
         return self._priority

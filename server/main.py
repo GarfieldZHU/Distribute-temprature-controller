@@ -3,6 +3,7 @@
 #启动文件，并没有什么乱用
 
 import jsonrpc_handle
+import manage_handle
 
 if __name__ == '__main__':
     jsonrpc_handle.server.init()

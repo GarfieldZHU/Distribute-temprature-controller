@@ -6,6 +6,7 @@ import datetime
 import threading
 from database import MySqlDB
 from controller import Controller
+from manage_handle import ManageHandle
 #from Queue import Queue
 #from Queue import PriorityQueue
 
@@ -31,6 +32,8 @@ class ServerHandle:
             ctl = Controller(item[0], self._mode)
             self._controllers[item[0]] = ctl
         threading.Thread(target=self.serve_thread).start()
+        self._manage_handle = ManageHandle()
+        threading.Thread(target=self._manage_handle.run).start()
 
     def get(self, i):
         res = self._db.query_client(i)
@@ -85,8 +88,7 @@ class ServerHandle:
         del self._controllers[id]
 
     def run(self):
-        while True:
-            pass
+        self._manage_handle.run()
 
     def pause(self):
         pass

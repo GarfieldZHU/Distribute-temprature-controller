@@ -8,6 +8,8 @@
 # WARNING! All changes made in this file will be lost!
 
 import sys
+import threading
+import jsonrpc_handle
 from PySide import QtCore, QtGui
 
 class Ui_MainWindow(object):
@@ -201,12 +203,12 @@ class Ui_MainWindow(object):
 
 class ControlMainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
-        super(ControllerMainWindow, self).__init__(parent)
+        super(ControlMainWindow, self).__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    mySW = ControllerMainWindow()
+    mySW = ControlMainWindow()
     mySW.show()
     sys.exit(app.exec_())

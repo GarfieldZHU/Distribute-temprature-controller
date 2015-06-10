@@ -90,7 +90,7 @@ class JsonrpcHandler(cyclone.jsonrpc.JsonrpcRequestHandler):
             elif not d['ison']:
                 print "- [set] room ", i , "power off"
                 server.get_controller(i).finish_task()
-                server._db.
+                #server._db.
 
             print "- [test-msg] <set_task>", item
             return server.set(item)

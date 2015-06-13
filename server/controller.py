@@ -4,11 +4,12 @@
 from __future__ import division
 import time
 from datetime import *
+from database import MySqlDB
 
 
 class Controller:
     #服务端温控模块类，用于和对应从控机交互
-    def __init__(self, room_id, mode):
+    def __init__(self, room_id, mode, db):
         self._room = room_id
         self._task = [-1, -1, -1]
         self._delta = 0.0
@@ -16,25 +17,37 @@ class Controller:
         self._priority = 0
         self._cost = 0.0
         self._mode = mode
+        self._db = db
         self.serve_permission = True
         self.RATE = 1/180
 
     def set_task(self, target, fan, temp, cost):
+        if cmp(self._task, [-1, -1, -1]) != 0:
+            #已有任务，新来任务时将前一次的任务写入数据库
+            print "- [new task] "
+            self.end_time = datetime.now()
+            self.end_temp = self._task[2]
+            self._delta = 0.0
+            self._db.insert_list(self.get_item())
         self._task = [target, fan, float(temp)]
         self._priority = fan
         self.begin_time = datetime.now()
-        self.begin_temp = temp
-        print "<controller> set task", self._task
+        self.begin_temp = self._task[2]
+        self.end_time = datetime.now()
+        self.end_temp = self._task[2]
         self._cost = cost
 
     def finish_task(self):
-        print "<controller> task finished"
+        print "- [controller] task finished"
+        self.end_time = datetime.now()
+        self.end_temp = self._task[2]
+
+        self._db.insert_list(self.get_item())
+        print "- [controller] <finish task> write list"
         self._task = [-1, -1, -1]
         self._priority = 0
         self._time = 0
         self._delta = 0
-        self.end_time = datetime.now()
-        self.end_temp = self._task[2]
 
     def if_finish(self):
         if self._task[0] == self._task[2]:
@@ -72,6 +85,12 @@ class Controller:
     def get_endTime(self):
         return self.end_time
 
+    def get_item(self):
+        item = (self._room, self.begin_time, self.end_time, self._mode, \
+            self._task[1], self.begin_temp, self.end_temp, self._delta)
+        print "- [controller] <get_item> ", item
+        return item
+
     def if_task(self):
         if cmp(self._task, [-1, -1, -1]) == 0:
             print '<controller> task not exist'
@@ -87,7 +106,7 @@ class Controller:
         if self._mode == 'cold':
             if cur > target:
                 cur -= self.RATE * fan
-                self._delta = self.RATE * fan
+                self._delta += self.RATE * fan
                 self._task[2] = cur
             else:
                 self.finish_task()
@@ -95,7 +114,7 @@ class Controller:
         else:
             if cur < target:
                 cur += self.RATE * fan
-                self._delta = self.RATE * fan
+                self._delta += self.RATE * fan
                 self._task[2] = cur
             else:
                 self.finish_task()
@@ -103,7 +122,8 @@ class Controller:
 
     def update_cost(self):
         #消费金额为1元每变化1度
-        self._cost += self._delta * 1
+        fan = self._task[1]
+        self._cost += self.RATE * fan
 
     def set_priority(self):
         #根据任务在主控端已等待的时间提高优先级

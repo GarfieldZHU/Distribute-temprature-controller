@@ -115,7 +115,7 @@ class ControlMainWindow(QtGui.QMainWindow):
         self.if_end = False
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.controller = Controller('304')
+        self.controller = Controller(0)
         self.initDisplay()
         self.ui.switchButton.clicked.connect(self.switch)
         self.ui.tempUp.clicked.connect(self.riseTemp)

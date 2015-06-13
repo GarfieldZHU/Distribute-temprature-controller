@@ -28,6 +28,7 @@ class Controller:
             self.MINTEMP = state['minTemperature']
             self._fanLevel = state['fanLevel']
             self._curTemp = state['temperature']
+            self._goalTemp = state['targetTemperature']
             self._cost = state['cost']
             self._isCentralOn = state['isCentralOn']
             if self.MAXTEMP >= 28:
@@ -50,31 +51,31 @@ class Controller:
 
     def rise_temp(self):
         if self._goalTemp < self.MAXTEMP:
-            if self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
-                    "targetTemperature": self._goalTemp+1}):
-                self._goalTemp += 1
-                print "- [log] temperature rise to ", self._goalTemp
+            self._goalTemp += 1
+            self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
+                "targetTemperature": self._goalTemp})
+            print "- [log] temperature rise to ", self._goalTemp
 
     def reduce_temp(self):
         if self._goalTemp > self.MINTEMP:
-            if self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
-                    "targetTemperature": self._goalTemp-1}):
-                self._goalTemp -= 1
-                print "- [log] temperature down to ", self._goalTemp
+            self._goalTemp -= 1
+            self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
+                "targetTemperature": self._goalTemp})
+            print "- [log] temperature down to ", self._goalTemp
 
     def rise_fan(self):
         if self._fanLevel < 3:
-            if self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
-                    "targetTemperature": self._goalTemp+1}):
-                self._fanLevel += 1
-                print "- [log] fan level rise to ", self._fanLevel
+            self._fanLevel += 1
+            self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
+                "targetTemperature": self._goalTemp})
+            print "- [log] fan level rise to ", self._fanLevel
 
     def reduce_fan(self):
         if self._fanLevel > 1:
-            if self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
-                    "targetTemperature": self._goalTemp-1}):
-                self._fanLevel -= 1
-                print "- [log] temperature down to ", self._fanLevel
+            self._fanLevel -= 1
+            self.set({"ison": self._ison, "fanLevel": self._fanLevel, \
+                "targetTemperature": self._goalTemp})
+            print "- [log] fan level down to ", self._fanLevel
 
     def is_on(self):
         return self._ison
@@ -105,15 +106,15 @@ class Controller:
 
     def start_up(self):
         #从控机开机
-        if self.set({"ison": True, "fanLevel": self._fanLevel, \
-            "targetTemperature": self._goalTemp}):
-            self._ison = True
+        self.set({"ison": True, "fanLevel": self._fanLevel, \
+            "targetTemperature": self._goalTemp})
+        self._ison = True
 
     def power_off(self):
         #从控机关机
-        if self.set({"ison": False, "fanLevel": self._fanLevel, \
-            "targetTemperature": self._goalTemp}):
-            self._ison = False
+        self.set({"ison": False, "fanLevel": self._fanLevel, \
+            "targetTemperature": self._goalTemp})
+        self._ison = False
 
     def update(self, state):
         self._cost = state['cost']

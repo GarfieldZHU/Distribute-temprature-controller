@@ -4,6 +4,7 @@ import mysql.connector
 
 
 class MySqlDB:
+    #数据库连接类，连接并建立到mysql的查询关系，方便程序中使用
     def __init__(self):
         self._config = {
             'host': 'localhost',
@@ -48,7 +49,9 @@ class MySqlDB:
         cursor = self._conn.cursor()
         try:
             sql = "insert into list(room_id ,beginTime, endTime, state, fanLevel, \
-                beginTemp, endTemp) values (%s, %s, %s, %s, %s, %s, %s);" % item
+                beginTemp, endTemp, cost) values ('%s', '%s', '%s', '%s', \
+                %s, %s, %s, %s);" % item
+            #print "- [database] <sql> insert list", sql
             cursor.execute(sql)
             self._conn.commit()
         except mysql.connector.Error as e:
@@ -61,7 +64,7 @@ class MySqlDB:
         try:
             sql = "update client set ison='%s', targetTemp='%s', fanLevel='%s' \
                 where room_id='%s';" % item
-            #print sql
+            #print "- [database] <sql> update client query ", sql
             cursor.execute(sql)
             self._conn.commit()
         except mysql.connector.Error as e:
@@ -74,7 +77,7 @@ class MySqlDB:
         try:
             sql = "update client set curTemp='%s', cost='%s' \
                 where room_id='%s';" % item
-            #print sql
+            #print "- [database] <sql> update client result ", sql
             cursor.execute(sql)
             self._conn.commit()
         except mysql.connector.Error as e:
@@ -86,7 +89,7 @@ class MySqlDB:
         cursor = self._conn.cursor()
         try:
             sql = "update client set curTemp='%s' where room_id='%s';" % item
-            #print sql
+            #print "- [database] <sql> update client curtemp ", sql
             cursor.execute(sql)
             self._conn.commit()
         except mysql.connector.Error as e:
@@ -145,7 +148,7 @@ class MySqlDB:
             cursor.execute(sql)
             res = {}
             for room_id, ison, targetTemp, fanLevel, curTemp, cost in cursor:
-                print room_id
+                #print room_id
                 res['room_id'] = room_id
                 res['ison'] = ison
                 res['targetTemp'] = targetTemp
@@ -166,7 +169,7 @@ class MySqlDB:
             cursor.execute(sql)
             res = {}
             for room_id, beginTime, endTime, state, fanLevel, beginTemp, \
-            endTemp in cursor:
+            endTemp, cost in cursor:
                 res['room_id'] = room_id
                 res['beginTime'] = beginTime
                 res['endTime'] = endTime
@@ -174,6 +177,7 @@ class MySqlDB:
                 res['fanLevel'] = fanLevel
                 res['beginTemp'] = beginTemp
                 res['endTemp'] = endTemp
+                res['cost'] = cost
         except mysql.connector.Error as e:
             print('query error!{}'.format(e))
         finally:

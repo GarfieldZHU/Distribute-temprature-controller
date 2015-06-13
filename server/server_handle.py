@@ -29,7 +29,7 @@ class ServerHandle:
     def init(self):
         print "- [test-msg] <rooms>", self.rooms
         for item in self.rooms:
-            ctl = Controller(item[0], self._mode)
+            ctl = Controller(item[0], self._mode, self._db)
             self._controllers[item[0]] = ctl
         threading.Thread(target=self.serve_thread).start()
         self._manage_handle = ManageHandle()
@@ -46,15 +46,15 @@ class ServerHandle:
         msg['minTemperature'] = self._minTemp
         msg['temperature'] = res['curTemp']
         msg['isCentralOn'] = True
-        print "- [get-msg] <get>", msg
+        print "- [server] <get>", msg
         return msg
 
     def set(self, item):
-        #print item
+        #print "- [xxxxxxxxxxx!!!!!!] <set> item ", item
         if item[2] <= 3 and item[2] >= 1 and \
                 item[1] >= self._minTemp and item[1] <= self._maxTemp:
             self._db.update_client_query(item)
-            print "- [set-msg] <set> success"
+
             return True
         else:
             return False
@@ -87,8 +87,12 @@ class ServerHandle:
     def del_controller(self, id, controller):
         del self._controllers[id]
 
+    def get_mode(self):
+        return self._mode
+
     def run(self):
-        self._manage_handle.run()
+        #self._manage_handle.run()
+        pass
 
     def pause(self):
         pass
@@ -156,6 +160,7 @@ class ServerHandle:
 
         if len(to_serve) <= 3:
             #不需要调度时，将任务全部加入调度列表
+            print "- [dispatch] don't need to dispatch"
             for id in to_serve:
                 #print 'to_serve', id
                 if self._controllers[id].if_task():
@@ -166,6 +171,7 @@ class ServerHandle:
             #需要调度时
             if cmp(dispatched_list, to_serve):
                 #和上一次服务列表相同，则说明需要轮转
+                print "- [dispatch] time span"
                 i = 0
                 while serve_flag[i] != 1:
                     i += 1
@@ -177,6 +183,7 @@ class ServerHandle:
                 serve_flag[serve_out] = 0
             else:
                 #和上一次服务列表不同，则进入一次新的轮转
+                print "- [dispatch] new span"
                 serve_flag = [-1 for i in range(to_serve)]
                 i = 0
                 for id in to_serve:

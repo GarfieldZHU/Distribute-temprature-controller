@@ -25,6 +25,7 @@ server = ServerHandle()
 
 
 class JsonrpcHandler(cyclone.jsonrpc.JsonrpcRequestHandler):
+    #JsonRpc通信模块类，根据html建立远端调用，使用异步框架
     def post(self, *args):
         self._auto_finish = False
         try:
@@ -78,22 +79,25 @@ class JsonrpcHandler(cyclone.jsonrpc.JsonrpcRequestHandler):
         if server.get_controller(i) is not None:
             item =  (d['ison'], d['targetTemperature'], d['fanLevel'], i)
             temp = server.get(i)['temperature']
+            print "- [set] request: ", item
             if temp == d['targetTemperature']:
                 #从控机自动变化温度后的请求
                 server.auto_set(i)
             if d['ison']:
-                print "- [set] room ", i , "on"
+                print "- [set] room ", i, "on"
+                server.set(item)
                 data = server.get_db().query_client(i)
                 cost = data['cost']
+                #print "- [jsonrpc] cost!!!! ", cost
+                #server.get_db().update_client_query(item)
                 server.get_controller(i).set_task(d['targetTemperature'], \
                     d['fanLevel'], temp, float(cost))
             elif not d['ison']:
                 print "- [set] room ", i , "power off"
                 server.get_controller(i).finish_task()
-                #server._db.
 
             print "- [test-msg] <set_task>", item
-            return server.set(item)
+            return True
         else:
             return False
 

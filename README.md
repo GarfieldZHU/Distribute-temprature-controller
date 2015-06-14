@@ -6,4 +6,5 @@ This is my assignment of "software engineering" class, which is used as manager 
 - Language: python
 - Data form: JSON
 - Database: MySQL
-- Telecommunication protocal: JsonRpc
+- Telecommunication protocal: mqtt
+- broker: IBM rsmb /  mosquitto

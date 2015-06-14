@@ -45,6 +45,8 @@ class Controller:
         self.end_temp = self._task[2]
         self._cost = cost
         self._ison = True
+        item = ('on', self._task[0], self._task[1], self._room)
+        self._db.update_client_query(item)
 
     def finish_task(self):
         print "- [controller] task finished"

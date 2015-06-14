@@ -71,7 +71,7 @@ class ControllerDialog(QtGui.QDialog):
         check_out = datetime.now()
         check_in_time = datetime.strftime(check_in, '%Y-%m-%d %H:%M:%S')
         check_out_time = datetime.strftime(check_out, '%Y-%m-%d %H:%M:%S')
-        self.ui.tableWidget.setGeometry(QtCore.QRect(70, 10, 540, 180))
+        self.ui.tableWidget.setGeometry(QtCore.QRect(80, 10, 560, 180))
         self.ui.tableWidget.setColumnCount(4)
         self.ui.tableWidget.setRowCount(1)
         self.ui.tableWidget.setColumnWidth(0, 40)
@@ -85,3 +85,21 @@ class ControllerDialog(QtGui.QDialog):
         self.ui.tableWidget.setItem(0, 1, QtGui.QTableWidgetItem(check_in_time))
         self.ui.tableWidget.setItem(0, 2, QtGui.QTableWidgetItem(check_out_time))
         self.ui.tableWidget.setItem(0, 3, QtGui.QTableWidgetItem(str(sum)))
+
+    def setReport(self, db, i):
+        rooms = db.query_user_room()
+        self.ui.tableWidget.setGeometry(QtCore.QRect(140, 10, 400, 180))
+        self.ui.tableWidget.setColumnCount(2)
+        self.ui.tableWidget.setRowCount(len(rooms))
+        self.ui.tableWidget.setColumnWidth(0, 60)
+        self.ui.tableWidget.setColumnWidth(1, 150)
+
+        self.ui.tableWidget.setHorizontalHeaderLabels(['Room', 'total cost'])
+
+        j = 0
+        for item in rooms:
+            id = item[0]
+            res = db.query_list_report(id, i)
+            self.ui.tableWidget.setItem(j, 0, QtGui.QTableWidgetItem(str(id)))
+            self.ui.tableWidget.setItem(j, 1, QtGui.QTableWidgetItem(str(res)))
+            j += 1

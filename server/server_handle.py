@@ -272,6 +272,7 @@ def on_message(client, userdata, msg):
         print "- [get from database] ", data
         temp = data['curTemp']
         cost = float(data['cost'])
+
         server.get_controller(client_id).set_task(target, fan, curTemp, cost)
         server.get_controller(client_id).startup()
 
@@ -284,6 +285,8 @@ def on_message(client, userdata, msg):
         server.get_db().update_client_result(item)
         server.get_controller(client_id).finish_task()
         print "- [set] room ", client_id , "power off"
+        item = ('off', client_id)
+        server.get_db().update_client_state(item)
 
     elif res['method'] == 'requestserve':
         #print '- [requestserve]:'
@@ -301,7 +304,8 @@ def on_message(client, userdata, msg):
         cost = data['cost']
         temp = data['curTemp'] + 1
         server.get_controller(client_id).set_task(res['targettemperature'],
-        res['fanlevel'], temp, float(cost))
+            res['fanlevel'], temp, float(cost))
+
 def on_exec(strcmd):
     print("Exec: ", strcmd)
     #strExec = strcmd

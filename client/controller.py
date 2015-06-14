@@ -193,7 +193,7 @@ def on_exec(strcmd):
 
 ## --------------------------------------
 
-cid = '3'
+cid = '0'
 controller = Controller(cid)
 
 if __name__ == '__main__':

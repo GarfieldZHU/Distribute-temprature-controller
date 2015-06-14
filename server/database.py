@@ -85,6 +85,18 @@ class MySqlDB:
         finally:
             cursor.close()
 
+    def update_client_state(self, item):
+        cursor = self._conn.cursor()
+        try:
+            sql = "update client set state='%s' where room_id='%s';" % item
+            #print "- [database] <sql> update client query ", sql
+            cursor.execute(sql)
+            self._conn.commit()
+        except mysql.connector.Error as e:
+            print('update error!{}'.format(e))
+        finally:
+            cursor.close()
+
     def update_client_curtemp(self, item):
         cursor = self._conn.cursor()
         try:
@@ -189,6 +201,30 @@ class MySqlDB:
 
             for cost in cursor:
                 res = cost
+        except mysql.connector.Error as e:
+            print('query error!{}'.format(e))
+        finally:
+            cursor.close()
+            return res
+
+    def query_list_report(self, room_id, type):
+        cursor = self._conn.cursor()
+        try:
+            if type == 1:
+                sql = "select sum(cost) from list where \
+                    to_days(now()) - to_days(beginTime) <= 1 \
+                    and room_id = '%s';" % room_id
+            elif type == 2:
+                sql = "select sum(cost) from list where \
+                    to_days(now()) - to_days(beginTime) <= 7 \
+                    and room_id = '%s';" % room_id
+            else:
+                sql = "select sum(cost) from list where \
+                    to_days(now()) - to_days(beginTime) <= 30 \
+                    and room_id = '%s';" % room_id
+            cursor.execute(sql)
+            for item in cursor:
+                res.append(item)
         except mysql.connector.Error as e:
             print('query error!{}'.format(e))
         finally:

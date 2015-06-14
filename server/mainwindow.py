@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#__author__ = Garfield
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
@@ -58,7 +59,6 @@ class Ui_MainWindow(object):
         self.fanLevel1.setFont(font)
         self.fanLevel1.setSmallDecimalPoint(False)
         self.fanLevel1.setSegmentStyle(QtGui.QLCDNumber.Flat)
-        self.fanLevel1.setProperty("intValue", 24)
         self.fanLevel1.setObjectName("fanLevel1")
         self.label_6 = QtGui.QLabel(self.centralWidget)
         self.label_6.setGeometry(QtCore.QRect(20, 40, 59, 16))
@@ -269,35 +269,60 @@ class ControlMainWindow(QtGui.QMainWindow):
                 self.ui.curTemp1.display(item['curTemp'])
                 self.ui.targetTemp1.display(item['targetTemp'])
                 self.ui.fanLevel1.display(item['fanLevel'])
-                self.ui.cost1.display(item['cost'])
+                self.ui.cost1.display(float(item['cost']))
+            else:
+                self.ui.curTemp1.display(0)
+                self.ui.targetTemp1.display(0)
+                self.ui.fanLevel1.display(0)
+                self.ui.cost1.display(0)
 
             item = self._db.query_client(1)
             if item['state'] == 'on':
                 self.ui.curTemp2.display(item['curTemp'])
                 self.ui.targetTemp2.display(item['targetTemp'])
                 self.ui.fanLevel2.display(item['fanLevel'])
-                self.ui.cost2.display(item['cost'])
+                self.ui.cost2.display(float(item['cost']))
+            else:
+                self.ui.curTemp2.display(0)
+                self.ui.targetTemp2.display(0)
+                self.ui.fanLevel2.display(0)
+                self.ui.cost2.display(0)
 
             item = self._db.query_client(2)
             if item['state'] == 'on':
                 self.ui.curTemp3.display(item['curTemp'])
                 self.ui.targetTemp3.display(item['targetTemp'])
                 self.ui.fanLevel3.display(item['fanLevel'])
-                self.ui.cost3.display(item['cost'])
+                self.ui.cost3.display(float(item['cost']))
+            else:
+                self.ui.curTemp3.display(0)
+                self.ui.targetTemp3.display(0)
+                self.ui.fanLevel3.display(0)
+                self.ui.cost3.display(0)
 
             item = self._db.query_client(3)
             if item['state'] == 'on':
                 self.ui.curTemp4.display(item['curTemp'])
                 self.ui.targetTemp4.display(item['targetTemp'])
                 self.ui.fanLevel4.display(item['fanLevel'])
-                self.ui.cost4.display(item['cost'])
+                self.ui.cost4.display(float(item['cost']))
+            else:
+                self.ui.curTemp4.display(0)
+                self.ui.targetTemp4.display(0)
+                self.ui.fanLevel4.display(0)
+                self.ui.cost4.display(0)
 
             item = self._db.query_client(4)
             if item['state'] == 'on':
                 self.ui.curTemp5.display(item['curTemp'])
                 self.ui.targetTemp5.display(item['targetTemp'])
                 self.ui.fanLevel5.display(item['fanLevel'])
-                self.ui.cost5.display(item['cost'])
+                self.ui.cost5.display(float(item['cost']))
+            else:
+                self.ui.curTemp5.display(0)
+                self.ui.targetTemp5.display(0)
+                self.ui.fanLevel5.display(0)
+                self.ui.cost5.display(0)
 
             time.sleep(2)
 
@@ -352,13 +377,19 @@ class ControlMainWindow(QtGui.QMainWindow):
         cd.exec_()
 
     def get_day_report(self):
-        pass
+        cd = ControllerDialog(self)
+        cd.setReport(self._db, 0)
+        cd.exec_()
 
     def get_week_report(self):
-        pass
+        cd = ControllerDialog(self)
+        cd.setReport(self._db, 1)
+        cd.exec_()
 
     def get_month_report(self):
-        pass
+        cd = ControllerDialog(self)
+        cd.setReport(self._db, 2)
+        cd.exec_()
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

@@ -11,9 +11,9 @@ import sys
 import time
 import threading
 from PySide import QtCore, QtGui
-from controller import Controller
+import controller
 
-RELAY_TIME = 5000
+RELAY_TIME = 1000
 REQUEST_TIME = 60000
 #设定按键延迟等待的时间和自动变化温度时间，单位毫秒
 
@@ -115,7 +115,6 @@ class ControlMainWindow(QtGui.QMainWindow):
         self.if_end = False
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.controller = Controller(0)
         self.initDisplay()
         self.ui.switchButton.clicked.connect(self.switch)
         self.ui.tempUp.clicked.connect(self.riseTemp)
@@ -124,46 +123,46 @@ class ControlMainWindow(QtGui.QMainWindow):
         self.ui.speedDown.clicked.connect(self.reduceSpeed)
         self.timer = QtCore.QTimer(self)
         self.connect(self.timer, QtCore.SIGNAL("timeout()"), self.send_update)
-        self.auto_timer = QtCore.QTimer(self)
-        self.connect(self.auto_timer, QtCore.SIGNAL("timeout()"), self.auto_request)
+        #self.auto_timer = QtCore.QTimer(self)
+        #self.connect(self.auto_timer, QtCore.SIGNAL("timeout()"), self.auto_request)
         self.task = ''
 
         threading.Thread(target=self.update_thread).start()
+        threading.Thread(target=self.run_thread).start()
 
     def initDisplay(self):
-        self.ui.curTemp.display(self.controller.get_cur_temp())
-        self.ui.targetTemp.display(self.controller.get_temp())
-        self.setSpeed(self.controller.get_fan())
-        self.ui.totalCost.display(self.controller.get_cost())
+        self.ui.curTemp.display(int(controller.controller.get_cur_temp()))
+        self.ui.targetTemp.display(int(controller.controller.get_temp()))
+        self.setSpeed(controller.controller.get_fan())
+        self.ui.totalCost.display(controller.controller.get_cost())
 
     def send_update(self):
         if self.task == 'poweroff':
-            self.controller.power_off()
+            controller.controller.power_off()
             self.ui.stateLabel.setText("\t--Off--")
             print "- [log] Power off..."
         elif self.task == 'startup':
-            self.controller.start_up()
+            controller.controller.start_up()
             self.ui.stateLabel.setText("\t--On--")
             print "- [log] Start up..."
         elif self.task == 'risetemp':
-            self.controller.rise_temp()
-            self.ui.targetTemp.display(self.controller.get_temp())
+            controller.controller.rise_temp()
+            self.ui.targetTemp.display(controller.controller.get_temp())
         elif self.task == 'reducetemp':
-            self.controller.reduce_temp()
-            self.ui.targetTemp.display(self.controller.get_temp())
+            controller.controller.reduce_temp()
+            self.ui.targetTemp.display(controller.controller.get_temp())
         elif self.task == 'risespeed':
-            self.controller.rise_fan()
-            speed = self.controller.get_fan()
+            controller.controller.rise_fan()
+            speed = controller.controller.get_fan()
             self.setSpeed(speed)
         elif self.task == 'reducespeed':
-            self.controller.reduce_fan()
-            speed = self.controller.get_fan()
+            controller.controller.reduce_fan()
+            speed = controller.controller.get_fan()
             self.setSpeed(speed)
         self.timer.stop()
 
-
     def switch(self):
-        if self.controller.is_on():
+        if controller.controller.get_state() == 'on':
             self.timer.start(RELAY_TIME)
             self.task = 'poweroff'
         else:
@@ -197,29 +196,21 @@ class ControlMainWindow(QtGui.QMainWindow):
             i -= 1
         self.ui.speedLabel.setText(text)
 
+    def run_thread(self):
+        controller.controller.run()
+
     def update_thread(self):
         while not self.if_end:
-            if self.controller.get():
-                print '- [UI] update'
-                self.ui.curTemp.display(self.controller.get_cur_temp())
-                self.ui.targetTemp.display(self.controller.get_temp())
-                self.setSpeed(self.controller.get_fan())
-                self.ui.totalCost.display(self.controller.get_cost())
-                #if self.controller.get_mode() == 'cold':
-                if self.controller.if_finish():
-                    self.auto_timer.start(REQUEST_TIME)
-            time.sleep(60)
+            if controller.controller.get_state() == 'on':
+                self.ui.curTemp.display(int(controller.controller.get_cur_temp()))
+                self.ui.totalCost.display(controller.controller.get_cost())
+            elif controller.controller.get_state() == 'standby':
+                if controller.controller.cmp_temp():
+                    controller.controller.auto_change()
+                else:
+                    controller.controller.auto_request()
+            time.sleep(1)
 
-    def auto_request(self):
-        self.controller.resume_temp()
-        self.ui.curTemp.display(self.controller.get_cur_temp())
-        if self.controller.get_mode() == 'cold':
-            self.controller.reduce_temp()
-            self.ui.targetTemp.display(self.controller.get_temp())
-        else:
-            self.controller.rise_temp()
-            self.ui.targetTemp.display(self.controller.get_temp())
-        self.auto_timer.stop()
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

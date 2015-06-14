@@ -11,6 +11,7 @@ class Controller:
     #服务端温控模块类，用于和对应从控机交互
     def __init__(self, room_id, mode, db):
         self._room = room_id
+        self._ison = False
         self._task = [-1, -1, -1]
         self._delta = 0.0
         self._cost = 0.0
@@ -21,21 +22,29 @@ class Controller:
         self.serve_permission = True
         self.RATE = 1/180
 
+    def startup(self):
+        self._ison = True
+
+    def poweroff(self):
+        self._ison = False
+
     def set_task(self, target, fan, temp, cost):
-        if cmp(self._task, [-1, -1, -1]) != 0:
+        if self._ison:
             #已有任务，新来任务时将前一次的任务写入数据库
             print "- [new task] "
             self.end_time = datetime.now()
             self.end_temp = self._task[2]
-            self._delta = 0.0
             self._db.insert_list(self.get_item())
+            self._delta = 0.0
         self._task = [target, fan, float(temp)]
+        print "- [task] ", self._task
         self._priority = fan
         self.begin_time = datetime.now()
         self.begin_temp = self._task[2]
         self.end_time = datetime.now()
         self.end_temp = self._task[2]
         self._cost = cost
+        self._ison = True
 
     def finish_task(self):
         print "- [controller] task finished"
@@ -50,10 +59,13 @@ class Controller:
         self._delta = 0
 
     def if_finish(self):
-        if self._task[0] == self._task[2]:
+        if self._task[0] == self._task[2] and self._task[0] != -1:
             return True
         else:
             return False
+
+    def if_on(self):
+        return self._ison
 
     def set_cost(self, cost):
         self._cost = cost
@@ -72,6 +84,9 @@ class Controller:
 
     def get_cost(self):
         return self._cost
+
+    def get_delta(self):
+        return self._delta
 
     def get_beginTemp(self):
         return self.begin_temp
@@ -92,7 +107,7 @@ class Controller:
         return item
 
     def if_task(self):
-        if cmp(self._task, [-1, -1, -1]) == 0:
+        if not self._ison:
             print '<controller> task not exist'
             return False
         else:
@@ -103,7 +118,7 @@ class Controller:
         cur = self._task[2]
         target = self._task[0]
         fan = self._task[1]
-        if self._mode == 'cold':
+        if self._mode == -1:
             if cur > target:
                 cur -= self.RATE * fan
                 self._delta += self.RATE * fan

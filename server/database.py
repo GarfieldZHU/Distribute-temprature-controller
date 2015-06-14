@@ -23,8 +23,8 @@ class MySqlDB:
     def insert_user(self, item):
         cursor = self._conn.cursor()
         try:
-            sql = "insert into user(id ,room_id, name) values (%s, %s, %s);" \
-                % item
+            sql = "insert into user(room_id, name, check_in) values \
+                (%s, %s, %s);" % item
             cursor.execute(sql)
             self._conn.commit()
         except mysql.connector.Error as e:
@@ -35,8 +35,8 @@ class MySqlDB:
     def insert_client(self, item):
         cursor = self._conn.cursor()
         try:
-            sql = "insert into client(room_id ,ison, targetTemp, fanLevel, curTemp, cost)\
-                values ('%s', %s, %s, %s, %s, %s);" % item
+            sql = "insert into client(room_id ,state, targetTemp, fanLevel, curTemp, cost)\
+                values ('%s', '%s', %s, %s, %s, %s);" % item
             #print sql
             cursor.execute(sql)
             self._conn.commit()
@@ -62,7 +62,7 @@ class MySqlDB:
     def update_client_query(self, item):
         cursor = self._conn.cursor()
         try:
-            sql = "update client set ison='%s', targetTemp='%s', fanLevel='%s' \
+            sql = "update client set state='%s', targetTemp='%s', fanLevel='%s' \
                 where room_id='%s';" % item
             #print "- [database] <sql> update client query ", sql
             cursor.execute(sql)
@@ -130,10 +130,10 @@ class MySqlDB:
             sql = "select * from user where room_id='%s';" % room_id
             cursor.execute(sql)
             res = {}
-            for id, room_id, name in cursor:
-                res['id'] = id
+            for room_id, name, check_in in cursor:
                 res['room_id'] = room_id
                 res['name'] = name
+                res['check_in'] = check_in
         except mysql.connector.Error as e:
             print('query error!{}'.format(e))
         finally:
@@ -144,17 +144,18 @@ class MySqlDB:
         cursor = self._conn.cursor()
         try:
             sql = "select * from client where room_id='%s';" % room_id
-            print sql
+            #print sql
             cursor.execute(sql)
             res = {}
-            for room_id, ison, targetTemp, fanLevel, curTemp, cost in cursor:
+            for room_id, state, targetTemp, fanLevel, curTemp, cost in cursor:
                 #print room_id
                 res['room_id'] = room_id
-                res['ison'] = ison
+                res['state'] = state
                 res['targetTemp'] = targetTemp
                 res['fanLevel'] = fanLevel
                 res['curTemp'] = curTemp
                 res['cost'] = cost
+
         except mysql.connector.Error as e:
             print('query error!{}'.format(e))
         finally:
@@ -167,22 +168,33 @@ class MySqlDB:
         try:
             sql = "select * from list where room_id='%s';" % room_id
             cursor.execute(sql)
-            res = {}
+            res = []
+            item = {}
             for room_id, beginTime, endTime, state, fanLevel, beginTemp, \
-            endTemp, cost in cursor:
-                res['room_id'] = room_id
-                res['beginTime'] = beginTime
-                res['endTime'] = endTime
-                res['state'] = state
-                res['fanLevel'] = fanLevel
-                res['beginTemp'] = beginTemp
-                res['endTemp'] = endTemp
-                res['cost'] = cost
+                endTemp, cost in cursor:
+                res.append([room_id, beginTime, endTime, state, fanLevel, \
+                    beginTemp, endTemp, cost])
         except mysql.connector.Error as e:
             print('query error!{}'.format(e))
         finally:
             cursor.close()
             return res
+
+
+    def query_list_sum(self, room_id):
+        cursor = self._conn.cursor()
+        try:
+            sql = "select sum(cost) from list where room_id=%s;" % room_id
+            cursor.execute(sql)
+
+            for cost in cursor:
+                res = cost
+        except mysql.connector.Error as e:
+            print('query error!{}'.format(e))
+        finally:
+            cursor.close()
+            return res
+
 
     def delete_user(self, room_id):
         cursor = self._conn.cursor()

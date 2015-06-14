@@ -91,7 +91,7 @@ class JsonrpcHandler(cyclone.jsonrpc.JsonrpcRequestHandler):
                 #print "- [jsonrpc] cost!!!! ", cost
                 #server.get_db().update_client_query(item)
                 server.get_controller(i).set_task(d['targetTemperature'], \
-                    d['fanLevel'], temp, float(cost))
+                    d['fanLevel'], float(cost))
             elif not d['ison']:
                 print "- [set] room ", i , "power off"
                 server.get_controller(i).finish_task()

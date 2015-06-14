@@ -12,7 +12,7 @@ import threading
 import time
 from database import MySqlDB
 from PySide import QtCore, QtGui
-
+from dialog import ControllerDialog
 
 class Ui_MainWindow(object):
     #管理员类，绘制管理圆界面
@@ -265,35 +265,35 @@ class ControlMainWindow(QtGui.QMainWindow):
     def update_thread(self):
         while True:
             item = self._db.query_client(0)
-            if item['ison']:
+            if item['state'] == 'on':
                 self.ui.curTemp1.display(item['curTemp'])
                 self.ui.targetTemp1.display(item['targetTemp'])
                 self.ui.fanLevel1.display(item['fanLevel'])
                 self.ui.cost1.display(item['cost'])
 
             item = self._db.query_client(1)
-            if item['ison']:
+            if item['state'] == 'on':
                 self.ui.curTemp2.display(item['curTemp'])
                 self.ui.targetTemp2.display(item['targetTemp'])
                 self.ui.fanLevel2.display(item['fanLevel'])
                 self.ui.cost2.display(item['cost'])
 
             item = self._db.query_client(2)
-            if item['ison']:
+            if item['state'] == 'on':
                 self.ui.curTemp3.display(item['curTemp'])
                 self.ui.targetTemp3.display(item['targetTemp'])
                 self.ui.fanLevel3.display(item['fanLevel'])
                 self.ui.cost3.display(item['cost'])
 
             item = self._db.query_client(3)
-            if item['ison']:
+            if item['state'] == 'on':
                 self.ui.curTemp4.display(item['curTemp'])
                 self.ui.targetTemp4.display(item['targetTemp'])
                 self.ui.fanLevel4.display(item['fanLevel'])
                 self.ui.cost4.display(item['cost'])
 
             item = self._db.query_client(4)
-            if item['ison']:
+            if item['state'] == 'on':
                 self.ui.curTemp5.display(item['curTemp'])
                 self.ui.targetTemp5.display(item['targetTemp'])
                 self.ui.fanLevel5.display(item['fanLevel'])
@@ -301,7 +301,63 @@ class ControlMainWindow(QtGui.QMainWindow):
 
             time.sleep(2)
 
-    def get_day_report():
+    def get_detail1(self):
+        cd = ControllerDialog(self)
+        cd.setDetailTable(self._db, 0)
+        cd.exec_()
+
+    def get_detail2(self):
+        cd = ControllerDialog(self)
+        cd.setDetailTable(self._db, 1)
+        cd.exec_()
+
+    def get_detail3(self):
+        cd = ControllerDialog(self)
+        cd.setDetailTable(self._db, 2)
+        cd.exec_()
+
+    def get_detail4(self):
+        cd = ControllerDialog(self)
+        cd.setDetailTable(self._db, 3)
+        cd.exec_()
+
+    def get_detail5(self):
+        cd = ControllerDialog(self)
+        cd.setDetailTable(self._db, 4)
+        cd.exec_()
+
+    def get_bill1(self):
+        cd = ControllerDialog(self)
+        cd.setBillTable(self._db, 0)
+        cd.exec_()
+
+    def get_bill2(self):
+        cd = ControllerDialog(self)
+        cd.setBillTable(self._db, 1)
+        cd.exec_()
+
+    def get_bill3(self):
+        cd = ControllerDialog(self)
+        cd.setBillTable(self._db, 2)
+        cd.exec_()
+
+    def get_bill4(self):
+        cd = ControllerDialog(self)
+        cd.setBillTable(self._db, 3)
+        cd.exec_()
+
+    def get_bill5(self):
+        cd = ControllerDialog(self)
+        cd.setBillTable(self._db, 4)
+        cd.exec_()
+
+    def get_day_report(self):
+        pass
+
+    def get_week_report(self):
+        pass
+
+    def get_month_report(self):
         pass
 
 if __name__ == '__main__':

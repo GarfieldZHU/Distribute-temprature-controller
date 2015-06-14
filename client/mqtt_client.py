@@ -1,7 +1,6 @@
 #coding=utf-8
 #__author__ = 'Garfield'
 
-from controller import *
 import paho.mqtt.client as mqtt
 import sys
 import datetime
@@ -29,7 +28,7 @@ class MqttClient:
             self._client.publish('hello/world', 'Hello world')
             self._client.loop_forever()
         except ConnectionError:
-            print("Paho-Mqtt fail to connect the mosquitto server")
+            print("Paho-Mqtt fail to connect the server")
 
 
 def on_connect(client, userdata, rc):
@@ -62,14 +61,5 @@ def on_exec(strcmd):
 #======================================
 
 if __name__ == '__main__':
-    client = mqtt.Client("my client")
-    client.on_message = on_message
-    client.on_connect = on_connect
-    client.on_publish = on_publish
-    client.on_subscribe = on_subscribe
-    client.on_log = on_log
-
-    broker = "localhost"
-    client.connect(broker, 1883, 60)
-    client.subscribe("/inode/mychannel", 0)
-    client.loop_forever()
+    client = MqttClient()
+    client.run()

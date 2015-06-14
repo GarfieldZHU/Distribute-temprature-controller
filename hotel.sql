@@ -24,13 +24,13 @@ DROP TABLE IF EXISTS `client`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `client` (
   `room_id` varchar(5) NOT NULL,
-  `ison` bit(1) NOT NULL,
-  `targetTemp` int(11) NOT NULL,
+  `state` varchar(10) NOT NULL,
+  `targetTemp` float NOT NULL,
   `fanLevel` int(11) NOT NULL,
-  `curTemp` int(11) NOT NULL,
+  `curTemp` float NOT NULL,
   `cost` decimal(5,2) NOT NULL,
   PRIMARY KEY (`room_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +39,7 @@ CREATE TABLE `client` (
 
 LOCK TABLES `client` WRITE;
 /*!40000 ALTER TABLE `client` DISABLE KEYS */;
-INSERT INTO `client` VALUES ('304','',24,1,32,'3.84'),('305','\0',20,3,25,'1.00');
+INSERT INTO `client` VALUES ('0','off',25,2,30,'0.00'),('1','off',25,1,32,'0.00'),('2','off',25,1,32,'0.00'),('3','off',25,1,29.1556,'0.84'),('4','off',25,1,30,'0.00');
 /*!40000 ALTER TABLE `client` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -52,14 +52,15 @@ DROP TABLE IF EXISTS `list`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `list` (
   `room_id` varchar(5) NOT NULL,
-  `beginTime` datetime DEFAULT NULL,
-  `endTime` datetime DEFAULT NULL,
+  `beginTime` datetime NOT NULL,
+  `endTime` datetime NOT NULL,
   `state` varchar(10) NOT NULL,
   `fanLevel` int(11) NOT NULL,
   `beginTemp` int(11) NOT NULL,
   `endTemp` int(11) NOT NULL,
-  PRIMARY KEY (`room_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `cost` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`beginTime`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -68,6 +69,7 @@ CREATE TABLE `list` (
 
 LOCK TABLES `list` WRITE;
 /*!40000 ALTER TABLE `list` DISABLE KEYS */;
+INSERT INTO `list` VALUES ('3','2015-06-14 15:18:23','2015-06-14 15:18:34','-1',2,29,29,'0.13'),('3','2015-06-14 15:18:11','2015-06-14 15:18:23','-1',2,29,29,'0.12'),('3','2015-06-14 15:16:25','2015-06-14 15:18:11','-1',1,30,29,'0.59');
 /*!40000 ALTER TABLE `list` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -79,11 +81,11 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user` (
-  `id` varchar(18) NOT NULL,
   `room_id` varchar(5) NOT NULL,
-  `name` varchar(10) NOT NULL,
+  `name` varchar(20) NOT NULL,
+  `check_in` datetime NOT NULL,
   PRIMARY KEY (`room_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -92,7 +94,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES ('222223345123784254','301','Mark'),('345523511233314775','302','Sony'),('341177756300347346','303','Tommy'),('123456789098765432','304','Jack'),('33021223144231231X','305','Lolipop');
+INSERT INTO `user` VALUES ('0','Garfield','2015-06-13 20:42:41'),('1','Jack','2015-06-13 20:43:01'),('2','Sony','2015-06-13 20:43:12'),('3','Tim','2015-06-13 20:43:20'),('4','Mark','2015-06-13 20:43:28');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -105,4 +107,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-06-10 20:31:46
+-- Dump completed on 2015-06-14 15:22:43
